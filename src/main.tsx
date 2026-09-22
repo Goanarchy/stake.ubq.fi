@@ -5,7 +5,7 @@ import { WagmiProvider } from "wagmi";
 import App from "./App.tsx";
 import { grid } from "./the-grid";
 import { StatusMessageProvider } from "./context/status-message.tsx";
-import { wagmiConfig } from "./wallet/config";
+import { initializeRpcRuntime } from "./utils/rpc-runtime";
 
 const queryClient = new QueryClient();
 
@@ -20,17 +20,41 @@ if (!gridElement) {
   console.warn("Could not find grid element for background animation");
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <StatusMessageProvider>
-          <App />
-        </StatusMessageProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  </StrictMode>
-);
+const root = createRoot(rootElement);
+
+async function bootstrap() {
+  await initializeRpcRuntime();
+  // The wallet config reads the resolved RPC selection, so it must load after initialization.
+  const { wagmiConfig } = await import("./wallet/config.ts");
+
+  root.render(
+    <StrictMode>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <StatusMessageProvider>
+            <App />
+          </StatusMessageProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </StrictMode>
+  );
+}
+
+function renderBootstrapError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error("[bootstrap] Unable to initialize the RPC runtime", error);
+
+  root.render(
+    <StrictMode>
+      <section id="bootstrap-error" style={{ padding: "20px" }}>
+        <h1>Unable to start Ubiquity Staking</h1>
+        <p>RPC initialization failed: {message}</p>
+      </section>
+    </StrictMode>
+  );
+}
+
+void bootstrap().catch(renderBootstrapError);
 
 if (gridElement) {
   grid(gridElement, () => document.body.classList.add("grid-loaded"));

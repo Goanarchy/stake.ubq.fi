@@ -4,6 +4,7 @@ import { PoolDisplay } from "./pool-display.tsx";
 import { ConnectWalletButton } from "./connect-wallet.tsx";
 import { supportedChains } from "../wallet/config.ts";
 import { useStatusMessageState } from "../context/status-message.tsx";
+import { RpcDiagnostics } from "./rpc-diagnostics.tsx";
 
 const LogoSpan = () => <span id="header-logo-wrapper">{ICONS.DAO_LOGO}</span>;
 
@@ -46,6 +47,8 @@ export function DashboardPage() {
           </div>
         </section>
       )}
+
+      <RpcDiagnostics />
 
       {isUnsupportedChain ? (
         <div className="pool-container">
