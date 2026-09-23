@@ -12,7 +12,6 @@ interface ToastState {
   lastToast: { message: string; timestamp: number } | null;
 }
 
-
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function toastReducer(state: ToastState, action: ToastAction): ToastState {
@@ -49,28 +48,31 @@ export function toastReducer(state: ToastState, action: ToastAction): ToastState
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(toastReducer, { toasts: [], lastToast: null });
 
-  const toast = useCallback((message: string, variant: ToastVariant = "info", duration?: number): string | null => {
-    // Check for deduplication before creating a new toast
-    if (state.lastToast && state.lastToast.message === message) {
-      const timeSinceLast = Date.now() - state.lastToast.timestamp;
-      if (timeSinceLast < TOAST_CONFIG.dedupWindow) {
-        // Find and return the existing toast's id
-        const existingToast = state.toasts.find(t => t.message === message);
-        return existingToast?.id ?? null;
+  const toast = useCallback(
+    (message: string, variant: ToastVariant = "info", duration?: number): string | null => {
+      // Check for deduplication before creating a new toast
+      if (state.lastToast && state.lastToast.message === message) {
+        const timeSinceLast = Date.now() - state.lastToast.timestamp;
+        if (timeSinceLast < TOAST_CONFIG.dedupWindow) {
+          // Find and return the existing toast's id
+          const existingToast = state.toasts.find((t) => t.message === message);
+          return existingToast?.id ?? null;
+        }
       }
-    }
 
-    const id = crypto.randomUUID();
-    const newToast: Toast = {
-      id,
-      message,
-      variant,
-      duration: duration ?? TOAST_CONFIG.defaultDuration,
-      timestamp: Date.now(),
-    };
-    dispatch({ type: "ADD", payload: newToast });
-    return id;
-  }, [state.toasts, state.lastToast]);
+      const id = crypto.randomUUID();
+      const newToast: Toast = {
+        id,
+        message,
+        variant,
+        duration: duration ?? TOAST_CONFIG.defaultDuration,
+        timestamp: Date.now(),
+      };
+      dispatch({ type: "ADD", payload: newToast });
+      return id;
+    },
+    [state.toasts, state.lastToast]
+  );
 
   const dismiss = useCallback((id: string) => {
     dispatch({ type: "DISMISS", payload: id });

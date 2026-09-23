@@ -26,7 +26,4 @@ export interface ToastContextValue {
   clear: () => void;
 }
 
-export type ToastAction =
-  | { type: "ADD"; payload: Toast }
-  | { type: "DISMISS"; payload: string }
-  | { type: "CLEAR" };
+export type ToastAction = { type: "ADD"; payload: Toast } | { type: "DISMISS"; payload: string } | { type: "CLEAR" };
