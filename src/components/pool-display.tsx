@@ -40,6 +40,34 @@ const WRITE_ACTION = {
 
 type WriteAction = (typeof WRITE_ACTION)[keyof typeof WRITE_ACTION];
 
+export function getPoolDisplayMetrics({
+  rewardPerBlock,
+  poolAllocationPoints,
+  totalAllocationPoints,
+  rewardTokenDecimals,
+  poolAmount,
+  userAmount,
+  lpTokenDecimals,
+}: {
+  rewardPerBlock: bigint;
+  poolAllocationPoints: bigint;
+  totalAllocationPoints: bigint;
+  rewardTokenDecimals: number;
+  poolAmount: bigint;
+  userAmount?: bigint;
+  lpTokenDecimals: number;
+}) {
+  const poolRewardPerDay = calculatePoolRewardPerDay(rewardPerBlock, poolAllocationPoints, totalAllocationPoints, rewardTokenDecimals);
+  const userPoolShare = userAmount !== undefined && poolAmount > 0n ? calculateUserPoolShare(userAmount, poolAmount, lpTokenDecimals) : null;
+  const userRewardPerDay = calculateUserRewardPerDay(userPoolShare, poolRewardPerDay);
+
+  return {
+    poolRewardPerDay,
+    userPoolShare,
+    userRewardPerDay,
+  };
+}
+
 export function PoolDisplay({ poolId = 0n }: PoolDisplayProps) {
   const { address, isConnected } = useAccount();
   const [stakeAmount, setStakeAmount] = useState("");
@@ -144,9 +172,15 @@ export function PoolDisplay({ poolId = 0n }: PoolDisplayProps) {
 
   const isAllowanceSufficient = staking.data.allowance.data !== undefined && parsedStakeAmount ? staking.data.allowance.data >= parsedStakeAmount : false;
 
-  const poolRewardPerDay = calculatePoolRewardPerDay(settings[3], pool.allocationPoints, settings[6], rewardToken.decimals);
-  const userPoolShare = userInfo && pool.amount > 0n ? calculateUserPoolShare(userInfo.amount, pool.amount, lpToken.decimals) : null;
-  const userRewardPerDay = calculateUserRewardPerDay(userPoolShare, poolRewardPerDay);
+  const { userPoolShare, userRewardPerDay } = getPoolDisplayMetrics({
+    rewardPerBlock: settings[3],
+    poolAllocationPoints: pool.allocationPoints,
+    totalAllocationPoints: settings[6],
+    rewardTokenDecimals: rewardToken.decimals,
+    poolAmount: pool.amount,
+    userAmount: userInfo?.amount,
+    lpTokenDecimals: lpToken.decimals,
+  });
   const isWritingContract = currentWriteAction !== WRITE_ACTION.NONE;
 
   return (
