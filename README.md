@@ -128,3 +128,13 @@ To run your own instance on Deno Deploy:
 2. Click **New Project**, choose **Git** integration, and select the `<your_org>/stake.ubq.fi` repository fork.
 3. When prompted for the project name, keep it identical to the repo slug (`stake-ubq-fi`). Deno will normalize the dots automatically.
 4. Confirm the existing CI deploy script configuration and create the project. Deployments will follow whatever branch target you choose.
+
+## Hosting
+
+Production runs on Cloudflare Workers as the `stake-ubq-fi` worker: the Vite
+`dist/` build is deployed as static assets with a single-page-application
+fallback (see `wrangler.toml`), and the zone route `stake.ubq.fi/*` points at
+it. The Deno Deploy target is no longer used (Deno Deploy shuts down in
+April 2027).
+
+Deploy: `bun x --bun vite build --mode prod && npx wrangler deploy`

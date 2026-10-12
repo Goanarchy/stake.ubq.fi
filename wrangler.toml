@@ -1,0 +1,9 @@
+name = "stake-ubq-fi"
+compatibility_date = "2024-10-01"
+account_id = "5c0228bee348f4cf48829ffe21b61fe9"
+
+# Static SPA: Vite dist with single-page-application fallback, matching the
+# previous Deno serve.ts behavior (file, else index.html for non-file paths).
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
