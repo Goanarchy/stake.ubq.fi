@@ -1,10 +1,12 @@
+import { lazy, Suspense } from "react";
 import { useAccount, useChainId } from "wagmi";
 import { ICONS } from "./iconography.tsx";
 import { PoolDisplay } from "./pool-display.tsx";
-import { ConnectWalletButton } from "./connect-wallet.tsx";
-import { supportedChains } from "../wallet/config.ts";
+import { supportedChains } from "../wallet/chains.ts";
 import { useStatusMessageState } from "../context/status-message.tsx";
-import { RpcDiagnostics } from "./rpc-diagnostics.tsx";
+
+const ConnectWalletButton = lazy(() => import("./connect-wallet.tsx").then((m) => ({ default: m.ConnectWalletButton })));
+const RpcDiagnostics = lazy(() => import("./rpc-diagnostics.tsx").then((m) => ({ default: m.RpcDiagnostics })));
 
 const LogoSpan = () => <span id="header-logo-wrapper">{ICONS.DAO_LOGO}</span>;
 
@@ -27,7 +29,15 @@ export function DashboardPage() {
           </h1>
         </div>
 
-        <ConnectWalletButton />
+        <Suspense
+          fallback={
+            <button className="primary-btn" disabled>
+              Connect Wallet
+            </button>
+          }
+        >
+          <ConnectWalletButton />
+        </Suspense>
       </section>
 
       {/* Status Displays */}
@@ -48,7 +58,9 @@ export function DashboardPage() {
         </section>
       )}
 
-      <RpcDiagnostics />
+      <Suspense fallback={null}>
+        <RpcDiagnostics />
+      </Suspense>
 
       {isUnsupportedChain ? (
         <div className="pool-container">

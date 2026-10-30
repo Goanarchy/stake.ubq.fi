@@ -1,14 +1,12 @@
-import { mainnet, anvil, type Chain } from "viem/chains";
+import type { Chain } from "viem/chains";
 import { fallback } from "viem";
 import { createConfig, http, injected, type Transport } from "wagmi";
 import { getChainRpcUrl, isLocalNode, RPC_FALLBACK_URLS, RPC_URL } from "../constants/config";
 import { getResolvedRpcBaseUrl } from "../utils/rpc-runtime";
+import { supportedChains, type ChainId } from "./chains";
 
-export { getChainRpcUrl };
+export { getChainRpcUrl, supportedChains, type ChainId };
 
-export const supportedChains: readonly [Chain, ...Chain[]] = isLocalNode ? [mainnet, anvil] : [mainnet];
-
-type ChainId = (typeof supportedChains)[number]["id"];
 type TransportsMap = Record<ChainId, Transport>;
 
 /** Bound every RPC transport so a stalled endpoint cannot hold a request open. */

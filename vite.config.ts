@@ -13,6 +13,31 @@ export default defineConfig({
   build: {
     cssCodeSplit: false,
     outDir: "dist",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const normalized = id.replace(/\\/g, "/");
+          if (normalized.includes("/node_modules/")) {
+            if (normalized.includes("/react/") || normalized.includes("/react-dom/") || normalized.includes("/scheduler/")) {
+              return "vendor-react";
+            }
+            if (normalized.includes("/@tanstack/react-query/")) {
+              return "vendor-query";
+            }
+            if (
+              normalized.includes("/wagmi/") ||
+              normalized.includes("/viem/") ||
+              normalized.includes("/@wagmi/") ||
+              normalized.includes("/@walletconnect/") ||
+              normalized.includes("/@coinbase/")
+            ) {
+              return "vendor-wallet";
+            }
+            return "vendor-misc";
+          }
+        },
+      },
+    },
   },
   worker: {
     format: "es",

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAccount, useChainId, useConnect, useDisconnect } from "wagmi";
-import { supportedChains } from "../wallet/config";
+import { supportedChains } from "../wallet/chains";
 import { ICONS } from "./iconography";
 import { formatWalletAddress, getChainName } from "../utils";
 import { useStatusMessageDispatch } from "../context/status-message";
